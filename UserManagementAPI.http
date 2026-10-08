@@ -1,0 +1,91 @@
+@baseUrl = http://localhost:5080
+@token = techhive-secret-token
+
+### Public: root and health check (no token needed)
+GET {{baseUrl}}/
+
+###
+GET {{baseUrl}}/health
+
+### Authentication: no token -> 401
+GET {{baseUrl}}/api/users
+
+### Authentication: wrong token -> 401
+GET {{baseUrl}}/api/users
+Authorization: Bearer wrong-token
+
+### List all users
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{token}}
+
+### List users filtered by department, with pagination
+GET {{baseUrl}}/api/users?department=IT&page=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### Get a user by id
+GET {{baseUrl}}/api/users/1
+Authorization: Bearer {{token}}
+
+### Get a user that does not exist -> 404
+GET {{baseUrl}}/api/users/999
+Authorization: Bearer {{token}}
+
+### Create a user -> 201
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Can",
+  "lastName": "Ozturk",
+  "email": "can.ozturk@techhive.com",
+  "department": "Finance",
+  "jobTitle": "Accountant"
+}
+
+### Create a user with invalid data -> 400 with field errors
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "",
+  "lastName": "X",
+  "email": "not-an-email",
+  "department": "",
+  "jobTitle": ""
+}
+
+### Create a user with an existing email -> 409
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Ayse",
+  "lastName": "Yilmaz",
+  "email": "ayse.yilmaz@techhive.com",
+  "department": "HR",
+  "jobTitle": "HR Manager"
+}
+
+### Update a user -> 200
+PUT {{baseUrl}}/api/users/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Ayse",
+  "lastName": "Yilmaz",
+  "email": "ayse.yilmaz@techhive.com",
+  "department": "HR",
+  "jobTitle": "Head of HR"
+}
+
+### Delete a user -> 204
+DELETE {{baseUrl}}/api/users/3
+Authorization: Bearer {{token}}
+
+### Trigger an unhandled exception -> 500 JSON error from the error-handling middleware
+GET {{baseUrl}}/api/test-error
+Authorization: Bearer {{token}}
